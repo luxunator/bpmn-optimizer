@@ -1,10 +1,16 @@
 import type { mxCell, mxGraph } from 'mxgraph';
 
 const addedColor = '#0073e6';
+const removedColor = '#c44601';
 
 const addedArrowStyleMap = {
   'endArrow': 'blockThin',
   'strokeColor': addedColor,
+};
+
+const removedArrowStyleMap = {
+  'endArrow': 'blockThin',
+  'strokeColor': removedColor,
 };
 
 function CyleBreak(graph: mxGraph): void {
@@ -12,6 +18,7 @@ function CyleBreak(graph: mxGraph): void {
   addedVertexStyleMap.strokeColor = addedColor;
 
   graph.getStylesheet().styles.sequenceFlowAdded = addedArrowStyleMap;
+  graph.getStylesheet().styles.sequenceFlowRemoved = removedArrowStyleMap;
   graph.getStylesheet().styles.vertexAdded = addedVertexStyleMap;
 
   const model = graph.getModel()
@@ -108,6 +115,10 @@ function CyleBreak(graph: mxGraph): void {
 
 	  vertex.outgoingEdges.forEach(cell => {
 		model.setStyle(cell, 'sequenceFlowAdded');
+	  });
+
+	  vertex.incomingEdges.forEach(cell => {
+		model.setStyle(cell, 'sequenceFlowRemoved');
 	  });
 	}
   }
