@@ -82,6 +82,35 @@ function CyleBreak(graph: mxGraph): void {
 
 	hasOutgoingOnlyVertices = !(outgoingOnlyVertices.length === 0 && outgoingOnlyVerticesEdges.flat().length === 0);
   }
+
+  // add the vertex with the most outgoing edges and least incoming edges
+  const vertices = allVertices.map(cell => {
+	const outgoingEdges = model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+	const incomingEdges = model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+
+	return { cell, outgoingEdges, incomingEdges };
+  });
+
+  const sortedVertices = vertices.sort((a, b) => {
+	const aOutgoing = a.outgoingEdges.length;
+	const aIncoming = a.incomingEdges.length;
+	const bOutgoing = b.outgoingEdges.length;
+	const bIncoming = b.incomingEdges.length;
+
+	return (bOutgoing - bIncoming) - (aOutgoing - aIncoming);
+  });
+
+  if (sortedVertices.length > 0) {
+	const vertex = sortedVertices[0];
+
+	if (vertex) {
+	  model.setStyle(vertex.cell, 'vertexAdded;' + model.getStyle(vertex.cell));
+
+	  vertex.outgoingEdges.forEach(cell => {
+		model.setStyle(cell, 'sequenceFlowAdded');
+	  });
+	}
+  }
 }
 
 export default CyleBreak;
