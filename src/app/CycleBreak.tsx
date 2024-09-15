@@ -20,7 +20,6 @@ function CyleBreak(graph: mxGraph): void {
   // add the sink vertices and their incoming edges
   let hasIncomingOnlyVertices = true;
   while (hasIncomingOnlyVertices) {
-
 	const incomingOnlyVertices = allVertices.filter(cell => {
       const outgoingEdges = model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
       const incomingEdges = model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
@@ -58,26 +57,31 @@ function CyleBreak(graph: mxGraph): void {
   });
 
   // add the source vertices and their outgoing edges
-  const outgoingOnlyVertices = allVertices.filter(cell => {
-	const outgoingEdges = model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
-	const incomingEdges = model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+  let hasOutgoingOnlyVertices = true;
+  while (hasOutgoingOnlyVertices) {
+	const outgoingOnlyVertices = allVertices.filter(cell => {
+	  const outgoingEdges = model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+	  const incomingEdges = model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
 
-	return outgoingEdges.length > 0 && incomingEdges.length === 0 && !model.getStyle(cell)?.includes('vertexAdded');
-  });
-
-  const outgoingOnlyVerticesEdges = outgoingOnlyVertices.map(cell => {
-	return model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
-  });
-
-  outgoingOnlyVertices.forEach(cell => {
-	model.setStyle(cell, 'vertexAdded;' + model.getStyle(cell));
-  });
-
-  outgoingOnlyVerticesEdges.forEach(edge => {
-    edge.forEach(cell => {
-	  model.setStyle(cell, 'sequenceFlowAdded');
+	  return outgoingEdges.length > 0 && incomingEdges.length === 0 && !model.getStyle(cell)?.includes('vertexAdded');
 	});
-  });
+
+	const outgoingOnlyVerticesEdges = outgoingOnlyVertices.map(cell => {
+	  return model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+	});
+
+	outgoingOnlyVertices.forEach(cell => {
+	  model.setStyle(cell, 'vertexAdded;' + model.getStyle(cell));
+	});
+
+	outgoingOnlyVerticesEdges.forEach(edge => {
+	  edge.forEach(cell => {
+		model.setStyle(cell, 'sequenceFlowAdded');
+	  });
+	});
+
+	hasOutgoingOnlyVertices = !(outgoingOnlyVertices.length === 0 && outgoingOnlyVerticesEdges.flat().length === 0);
+  }
 }
 
 export default CyleBreak;
