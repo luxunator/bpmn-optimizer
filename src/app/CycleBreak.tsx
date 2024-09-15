@@ -17,7 +17,7 @@ function CyleBreak(graph: mxGraph): void {
   const model = graph.getModel()
   const allVertices = model.filterDescendants((cell: mxCell) => { return cell.isVertex() }, model.getRoot());
 
-  // remove the sink vertices and their incoming edges
+  // add the sink vertices and their incoming edges
   let hasIncomingOnlyVertices = true;
   while (hasIncomingOnlyVertices) {
 
@@ -44,6 +44,18 @@ function CyleBreak(graph: mxGraph): void {
  
 	hasIncomingOnlyVertices = !(incomingOnlyVertices.length === 0 && incomingOnlyVerticesEdges.flat().length === 0);
   }
+
+  // add the isolated vertices
+  const isolatedVertices = allVertices.filter(cell => {
+    const outgoingEdges = model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+	const incomingEdges = model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+
+	return outgoingEdges.length === 0 && incomingEdges.length === 0 && !model.getStyle(cell)?.includes('vertexAdded');
+  });
+
+  isolatedVertices.forEach(cell => {
+	model.setStyle(cell, 'vertexAdded;' + model.getStyle(cell));
+  });
 }
 
 export default CyleBreak;
