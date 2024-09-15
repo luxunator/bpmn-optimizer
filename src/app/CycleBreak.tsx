@@ -18,26 +18,32 @@ function CyleBreak(graph: mxGraph): void {
   const allVertices = model.filterDescendants((cell: mxCell) => { return cell.isVertex() }, model.getRoot());
 
   // remove the sink vertices and their incoming edges
-  const incomingOnlyVertices = allVertices.filter(cell => {
-    const outgoingEdges = model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
-    const incomingEdges = model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+  let hasIncomingOnlyVertices = true;
+  while (hasIncomingOnlyVertices) {
 
-	return outgoingEdges.length === 0 && incomingEdges.length > 0 && !model.getStyle(cell)?.includes('vertexAdded');
-  });
+	const incomingOnlyVertices = allVertices.filter(cell => {
+      const outgoingEdges = model.getOutgoingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+      const incomingEdges = model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
 
-  const incomingOnlyVerticesEdges = incomingOnlyVertices.map(cell => {
-	return model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
-  });
-
-  incomingOnlyVertices.forEach(cell => {
-	model.setStyle(cell, 'vertexAdded;' + model.getStyle(cell));
-  });
-
-  incomingOnlyVerticesEdges.forEach(edge => {
-	edge.forEach(cell => {
-	  model.setStyle(cell, 'sequenceFlowAdded');
+	  return outgoingEdges.length === 0 && incomingEdges.length > 0 && !model.getStyle(cell)?.includes('vertexAdded');
 	});
-  });
+
+	const incomingOnlyVerticesEdges = incomingOnlyVertices.map(cell => {
+	  return model.getIncomingEdges(cell).filter(edge => !model.getStyle(edge)?.includes('sequenceFlowAdded'));
+	});
+
+	incomingOnlyVertices.forEach(cell => {
+	  model.setStyle(cell, 'vertexAdded;' + model.getStyle(cell));
+	});
+
+	incomingOnlyVerticesEdges.forEach(edge => {
+	  edge.forEach(cell => {
+	    model.setStyle(cell, 'sequenceFlowAdded');
+	  });
+	});
+ 
+	hasIncomingOnlyVertices = !(incomingOnlyVertices.length === 0 && incomingOnlyVerticesEdges.flat().length === 0);
+  }
 }
 
 export default CyleBreak;
