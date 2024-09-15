@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { BpmnVisualization } from 'bpmn-visualization';
 import { complexBpmnXml }  from './bpmn';
+import CycleBreak from './CycleBreak';
 
 const BpmnViewer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -16,6 +17,10 @@ const BpmnViewer: React.FC = () => {
 
       // Render the BPMN diagram
       bpmnVisualization.load(complexBpmnXml);
+
+	  CycleBreak(bpmnVisualization.graph);
+
+	  bpmnVisualization.graph.refresh();
     }
   }, []);
 
